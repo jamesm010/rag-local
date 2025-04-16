@@ -32,54 +32,45 @@ export async function POST(request: NextRequest) {
 
     console.log(`Attempting to batch import ${documents.length} documents into class: ${className}`);
 
-    let batcher = weaviateClient.batch.objectsBatcher();
-    let counter = 0;
+    // Initialize the client
+    await weaviateClient.connect();
+    
+    // Get the collection for the specified class name
+    const collection = weaviateClient.collections.get(className);
+    
+    // Prepare batch of objects for insertion
     const batchSize = 100; // Weaviate recommends batches of 100 or fewer
-
-    for (const doc of documents) {
-      const weaviateObject = {
-        class: className,
-        properties: doc.properties,
-        // id: doc.id, // Uncomment if providing your own UUIDs
-        // vector: doc.vector // Uncomment if providing your own vectors
-      };
-
-      batcher = batcher.withObject(weaviateObject);
-      counter++;
-
-      // Flush batch if size limit reached
-      if (counter % batchSize === 0) {
-        console.log(`Flushing batch at ${counter} objects...`);
-        const results = await batcher.do();
-        console.log('Batch flushed. Results:', JSON.stringify(results, null, 2));
-        // Check for errors in batch results
-        for (const result of results) {
-          if (result.result?.errors) {
-            console.error(`Error in batch item: ${JSON.stringify(result.result.errors)}`);
-            // Consider more robust error handling here
+    let counter = 0;
+    
+    // Process documents in batches
+    for (let i = 0; i < documents.length; i += batchSize) {
+      const batch = documents.slice(i, i + batchSize);
+      console.log(`Processing batch ${i / batchSize + 1} with ${batch.length} objects...`);
+      
+      try {
+        // Map documents to the format expected by insertMany
+        const objectsToInsert = batch.map(doc => {
+          const obj = {
+            ...doc.properties,
+          };
+          if (doc.id) {
+            Object.assign(obj, { id: doc.id });
           }
-        }
-        // Re-initialize batcher
-        batcher = weaviateClient.batch.objectsBatcher();
+          return obj;
+        });
+
+        // Insert batch of objects
+        await collection.data.insertMany(objectsToInsert);
+        console.log(`Batch ${i / batchSize + 1} processed successfully`);
+        counter += batch.length;
+      } catch (batchError) {
+        console.error(`Error processing batch starting at index ${i}:`, batchError);
+        // Continue with next batch instead of failing completely
       }
     }
 
-    // Flush remaining items
-    if (counter % batchSize !== 0) {
-      console.log(`Flushing remaining ${counter % batchSize} objects...`);
-      const results = await batcher.do();
-      console.log('Final batch flushed. Results:', JSON.stringify(results, null, 2));
-      // Check for errors in final batch results
-      for (const result of results) {
-        if (result.result?.errors) {
-          console.error(`Error in final batch item: ${JSON.stringify(result.result.errors)}`);
-          // Consider more robust error handling here
-        }
-      }
-    }
-
-    console.log(`Successfully imported ${documents.length} documents.`);
-    return NextResponse.json({ message: `Successfully imported ${documents.length} documents into ${className}.` }, { status: 201 });
+    console.log(`Successfully imported ${counter} documents.`);
+    return NextResponse.json({ message: `Successfully imported ${counter} documents into ${className}.` }, { status: 201 });
 
   } catch (error: unknown) {
     console.error('Error processing Weaviate upload:', error);
