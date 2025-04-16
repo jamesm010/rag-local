@@ -1,0 +1,15 @@
+# System Patterns
+
+**Architecture:** Standard Next.js App Router structure.
+
+**Key Decisions:**
+- Using Next.js for full-stack React capabilities.
+- Employing Tailwind CSS for utility-first styling.
+- Utilizing shadcn/ui for pre-built, customizable components.
+- Using TypeScript for static typing.
+- Using pnpm for package management.
+
+**Data Handling:**
+- Weaviate client initialized in `src/lib/weaviate.ts` using environment variables (`WEAVIATE_URL`, `WEAVIATE_API_KEY`).
+- API route pattern: Next.js App Router (`src/app/api/.../route.ts`).
+- Batch processing pattern used for Weaviate uploads (`client.batch.objectsBatcher`). 
