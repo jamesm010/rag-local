@@ -53,4 +53,12 @@
   - **History:**
     - `[timestamp]` - Task created
     - `[timestamp]` - Basic UI implementation completed
-    - `[timestamp]` - UI component errors fixed 
+    - `[timestamp]` - UI component errors fixed
+
+### 2024-08-18
+
+- [ ] **Fix Linter Errors in `weaviate-collection-utils.ts`** (ID: FIX-LINT-WEAVIATE-UTILS) - Level 1
+    - Status: IN_PROGRESS
+    - Goal: Resolve TypeScript type errors reported by the linter.
+    - Scope: `src/lib/weaviate-collection-utils.ts`
+    - Context: Address `any` types, optional chaining, and argument type mismatches based on Weaviate client v3 documentation. **Currently blocked by a persistent type error on the `property` argument of the `addProperty` method.** 

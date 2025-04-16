@@ -12,4 +12,7 @@
 **Data Handling:**
 - Weaviate client initialized in `src/lib/weaviate.ts` using environment variables (`WEAVIATE_URL`, `WEAVIATE_API_KEY`).
 - API route pattern: Next.js App Router (`src/app/api/.../route.ts`).
-- Batch processing pattern used for Weaviate uploads (`client.batch.objectsBatcher`). 
+- Batch processing pattern used for Weaviate uploads (`client.batch.objectsBatcher`).
+
+### Utility Classes
+- **`WeaviateCollectionUtils`**: Located in `src/lib/weaviate-collection-utils.ts`. Provides a wrapper around the `weaviate-client` library's `collections` API for common operations like creating, getting, updating, and deleting collections, as well as adding properties. Simplifies interactions with Weaviate collections. 

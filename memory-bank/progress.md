@@ -15,6 +15,10 @@
 - Improving error handling and validation
 - Adding more comprehensive documentation
 
+## What's Left / Blockers
+- **Testing:** The frontend upload page (`FE_UPLOAD_001`) needs testing against the backend API.
+- **Linter Error:** Blocked on resolving the TypeScript type error for the `property` argument in the `addProperty` method of `WeaviateCollectionUtils` (`src/lib/weaviate-collection-utils.ts`). The specific type `PropertyConfigCreate<TProperties>` (as set by the user) or other attempted types (`PropertyConfigCreate`, inline types) conflict with the underlying Weaviate client method signature or internal validation checks.
+
 ## Implementation Details
 - Using environment variables for Weaviate connection (WEAVIATE_URL, WEAVIATE_API_KEY)
 - Using shadcn/ui components for consistent UI styling

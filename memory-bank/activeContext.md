@@ -21,3 +21,12 @@
 - Initialized Shadcn UI.
 - Verified basic setup by running dev server.
 - Completed Task INIT-001.
+
+### 2024-08-18 Work Log:
+- Attempted to fix linter errors in `src/lib/weaviate-collection-utils.ts` (Task ID: FIX-LINT-WEAVIATE-UTILS).
+- Resolved issues with `any` types and optional chaining in `createCollection`, `getCollection`, and `updateCollection` methods.
+- Encountered persistent TypeScript type errors related to the `property` argument in the `addProperty` method.
+    - Tried `PropertyConfigCreate`, `PropertyConfigCreate<Properties>`, and a custom inline type.
+    - The core issue seems to be reconciling the utility function's input validation with the specific type (`PropertyConfigCreate`) expected by the underlying `collection.config.addProperty` method from the `weaviate-client` library.
+- The user manually updated the `addProperty` signature to use `PropertyConfigCreate<TProperties>`.
+- Currently blocked on resolving the type error for `addProperty`.
