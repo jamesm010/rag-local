@@ -10,6 +10,7 @@
 - Added collection name parameter support via URL query parameter
 - Designed fault-tolerant file processing with detailed error tracking
 - Added JSDoc comments throughout the file for improved maintainability
+- Enhanced file processing to handle large numbers of files by implementing batch processing (20 files per batch)
 
 **Key Features:**
 1. **Progress Tracking:**
@@ -28,18 +29,21 @@
    - Creates directories if they don't exist
    - Handles file reading errors gracefully with detailed reporting
    - Extracts metadata including filename, path, content, and modification time
+   - Processes files in batches of 20 to handle large numbers of files efficiently
+   - Provides detailed batch-level progress information and error handling
 
 4. **Error Handling:**
    - Detailed error tracking for individual files
    - Proper status codes for various error conditions
    - Consistent error message format for client consumption
+   - Batch-level error handling that only affects the current batch, not the entire upload
 
 **API Endpoints:**
 - `POST /api/docs/upload?collection=CollectionName` - Process and upload documents
 - `GET /api/docs/upload?collection=CollectionName` - Check upload progress
 
 **Affected Files:**
-- `src/app/api/docs/upload/route.ts` (Created)
+- `src/app/api/docs/upload/route.ts` (Created and Enhanced)
 
 **Next Steps:**
 - Integrate with frontend UI for file upload and progress monitoring
@@ -47,6 +51,12 @@
 - Implement document deletion and update functionality
 
 **Recent Changes:**
+- Enhanced document upload process in `src/app/api/docs/upload/route.ts` to handle large numbers of files:
+  - Added `BATCH_SIZE` constant (20 files per batch)
+  - Implemented batch processing logic to upload files in smaller chunks
+  - Added batch-level progress tracking and error handling
+  - Improved logging with batch number and total batch count
+  - Enhanced error recovery to only affect the current batch, not the entire upload
 - Enhanced `src/components/ui/combobox.tsx` component to allow adding custom actions at the end:
   - Added new `actions` prop of type `React.ReactNode` to the `ComboboxProps` interface
   - Added a conditional render for the actions in a bordered container at the bottom of the dropdown

@@ -70,6 +70,21 @@
     - `[2024-08-18]` - Task created
     - `[2024-08-18]` - Implementation completed with Promise.all pattern
 
+- [x] **Task ID: WEAVIATE-UPLOAD-BATCH** - Enhance Document Upload with Batch Processing
+  - **Status:** DONE
+  - **Complexity:** 2
+  - **Description:** Modify the document upload API route to process files in batches of 20 to handle large numbers of files efficiently.
+  - **Assignee:** AI
+  - **Sub-tasks:**
+    - [x] Add BATCH_SIZE constant (20 files per batch)
+    - [x] Implement batch processing logic
+    - [x] Add batch-level progress tracking
+    - [x] Enhance error handling for batch-level failures
+    - [x] Improve logging with batch information
+  - **History:**
+    - `[2024-08-19]` - Task created and completed
+    - `[2024-08-19]` - Implementation completed with batch processing
+
 ### 2024-08-18
 
 - [ ] **Fix Linter Errors in `weaviate-collection-utils.ts`** (ID: FIX-LINT-WEAVIATE-UTILS) - Level 1
@@ -107,6 +122,7 @@ updated_at: 2024-08-19T10:30:00Z # Placeholder
     - Dynamic collection creation
     - Support for multiple file types (.txt, .md, .json)
     - JSDoc comments for maintainability
+    - Batch processing (20 files per batch) for handling large numbers of files
   - **API Endpoints:**
     - POST /api/docs/upload?collection=Name - Upload documents
     - GET /api/docs/upload?collection=Name - Check progress

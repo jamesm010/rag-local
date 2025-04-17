@@ -9,8 +9,6 @@ import WeaviateCollectionUtils from '@/lib/weaviate-collection-utils';
 import WeaviateObjectUtils from '@/lib/weaviate-object-utils';
 import { NextResponse } from 'next/server';
 import type { Properties } from 'weaviate-client';
-// We might need the scanDirectory function or similar logic
-// import { scanDirectory } from '../route'; // Adjust path if needed
 
 /**
  * File paths and configuration constants
@@ -19,6 +17,7 @@ const PROGRESS_FILE_PATH = path.join(process.cwd(), '.temp', 'upload-progress.js
 const DOCS_DIR = path.join(process.cwd(), 'public', 'docs');
 const DEFAULT_COLLECTION_NAME = 'UploadedDocs';
 const SUPPORTED_EXTENSIONS = ['.txt', '.md', '.json']; // Add more as needed
+const BATCH_SIZE = 20; // Maximum number of files to process in a single batch
 
 /**
  * Interface for tracking the current state of document upload process
@@ -239,12 +238,16 @@ export async function POST(request: Request) {
     await writeProgress(progress);
 
     /**
-     * Step 4: Process each file and prepare for upload
-     * Reads file content, extracts metadata, and validates file type
+     * Step 4: Process files in batches and upload to Weaviate
+     * Reads file content, extracts metadata, and uploads in batches of BATCH_SIZE
      */
-    const objectsToUpload: DocumentProperties[] = [];
+    let currentBatch: DocumentProperties[] = [];
+    let batchNumber = 0;
+    const totalBatches = Math.ceil(allFilePaths.length / BATCH_SIZE);
 
-    for (const fullPath of allFilePaths) {
+    // Process files in batches
+    for (let i = 0; i < allFilePaths.length; i++) {
+      const fullPath = allFilePaths[i];
       const relativePath = path.relative(DOCS_DIR, fullPath).replace(/\\/g, '/'); // Fix: Escape backslash in replace
       const ext = path.extname(fullPath).toLowerCase();
 
@@ -262,7 +265,7 @@ export async function POST(request: Request) {
         const content = await fs.readFile(fullPath, 'utf-8');
         const stats = await fs.stat(fullPath);
 
-        objectsToUpload.push({
+        currentBatch.push({
           filename: path.basename(fullPath),
           filepath: relativePath, // Use relative path as unique ID source
           content: content,
@@ -278,47 +281,47 @@ export async function POST(request: Request) {
           error: `Read/Stat Error: ${readError.message}`,
         });
       }
-    }
-    // Write progress once after processing loop
-    await writeProgress(progress);
 
-    /**
-     * Step 5: Upload processed files to Weaviate
-     * Sends all valid documents to Weaviate in a batch operation
-     */
-    if (objectsToUpload.length > 0) {
-      try {
-        console.log(
-          `Attempting to upload ${objectsToUpload.length} objects using createObjects...`,
-        );
-        // Assuming createObjects handles potential errors internally or throws
-        const results = await objectUtils.createObjects(
-          collectionName,
-          objectsToUpload as Properties[],
-        );
-        // The createObjects method using Promise.all might not give detailed per-object errors easily
-        // If it resolves, assume success for progress tracking for now.
-        console.log(`Upload using createObjects finished. Result count: ${results.length}`);
-      } catch (uploadError: any) {
-        console.error('Error during Weaviate createObjects call:', uploadError);
-        progress.error = `Weaviate Upload Error: ${uploadError.message}`;
-        // Mark all files intended for this batch as failed in progress?
-        // Add a general upload error message to progress.
-        progress.failedFiles.push(
-          ...objectsToUpload.map((obj) => ({
-            filepath: obj.filepath,
-            error: `Upload Failed: ${uploadError.message}`,
-          })),
-        );
-        progress.filesUploaded = 0; // Reset count as the batch failed
-        progress.uploadedFilePaths = [];
+      // If we've reached the batch size or this is the last file, upload the current batch
+      if (currentBatch.length >= BATCH_SIZE || i === allFilePaths.length - 1) {
+        batchNumber++;
+        if (currentBatch.length > 0) {
+          try {
+            console.log(
+              `Uploading batch ${batchNumber}/${totalBatches} with ${currentBatch.length} objects...`,
+            );
+            const results = await objectUtils.createObjects(
+              collectionName,
+              currentBatch as Properties[],
+            );
+            console.log(`Batch ${batchNumber} upload complete. Result count: ${results.length}`);
+          } catch (uploadError: any) {
+            console.error(`Error during batch ${batchNumber} upload:`, uploadError);
+            progress.error = `Weaviate Upload Error in batch ${batchNumber}: ${uploadError.message}`;
+            // Mark all files in this batch as failed
+            progress.failedFiles.push(
+              ...currentBatch.map((obj) => ({
+                filepath: obj.filepath,
+                error: `Upload Failed in batch ${batchNumber}: ${uploadError.message}`,
+              })),
+            );
+            // Adjust the counts to reflect the failed batch
+            progress.filesUploaded -= currentBatch.length;
+            // Remove the failed files from uploadedFilePaths
+            progress.uploadedFilePaths = progress.uploadedFilePaths.filter(
+              (path) => !currentBatch.some((obj) => obj.filepath === path),
+            );
+          }
+        }
+        // Clear the batch for the next iteration
+        currentBatch = [];
+        // Write progress after each batch
+        await writeProgress(progress);
       }
-    } else {
-      console.log('No new valid documents found to upload.');
     }
 
     /**
-     * Step 6: Finalize progress and return results
+     * Step 5: Finalize progress and return results
      */
     progress.status = progress.error ? 'failed' : 'completed';
     progress.endTime = new Date().toISOString();

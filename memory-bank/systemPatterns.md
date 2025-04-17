@@ -16,6 +16,7 @@
 - Parallelized batch operations using Promise.all pattern for improved performance.
 - File system operations using Node.js fs module with promisified functions for async handling.
 - Recursive directory scanning pattern for traversing nested directory structures.
+- Chunked batch processing for handling large numbers of files (20 files per batch).
 
 ### File System Operations
 - **Directory Scanning**: Recursively scan directories using a tree-based approach that preserves the hierarchical structure.
@@ -27,6 +28,66 @@
   - Use the `node:` protocol prefix for Node.js built-in modules (`node:fs`, `node:path`, `node:util`) for clarity and to follow project linting rules.
   - Prefer promisified functions (`promisify`) over callback-based Node.js APIs for better async handling.
   - Use `for...of` loops instead of `forEach` when processing arrays for better readability and to follow project linting guidelines.
+
+### Batch Processing Pattern
+
+The project implements a standardized approach to processing large datasets in manageable chunks:
+
+1. **Batch Size Configuration:**
+   ```typescript
+   const BATCH_SIZE = 20; // Maximum number of items to process in a single batch
+   ```
+
+2. **Batch Processing Logic:**
+   - Process items in fixed-size batches
+   - Track batch number and total batches for progress reporting
+   - Clear batch after processing to free memory
+   - Update progress after each batch completion
+
+3. **Error Handling:**
+   - Batch-level error handling that only affects the current batch
+   - Detailed error tracking for individual items within a batch
+   - Proper adjustment of progress counters when a batch fails
+
+4. **Progress Tracking:**
+   - Update progress after each batch completion
+   - Provide detailed batch-level progress information
+   - Maintain accurate counts of processed, succeeded, and failed items
+
+5. **Implementation Example:**
+   ```typescript
+   let currentBatch: ItemType[] = [];
+   let batchNumber = 0;
+   let totalBatches = Math.ceil(allItems.length / BATCH_SIZE);
+   
+   for (let i = 0; i < allItems.length; i++) {
+     // Process item and add to current batch
+     currentBatch.push(processedItem);
+     
+     // If batch is full or this is the last item, process the batch
+     if (currentBatch.length >= BATCH_SIZE || i === allItems.length - 1) {
+       batchNumber++;
+       try {
+         // Process the batch
+         await processBatch(currentBatch);
+         // Update progress
+       } catch (error) {
+         // Handle batch-level error
+       }
+       // Clear the batch for the next iteration
+       currentBatch = [];
+       // Update progress
+     }
+   }
+   ```
+
+6. **Benefits:**
+   - Prevents memory issues with large datasets
+   - Improves reliability by isolating failures to specific batches
+   - Provides more granular progress updates
+   - Allows for better error recovery
+
+This pattern should be used for any operation that processes large numbers of items, especially when uploading to external services or performing resource-intensive operations.
 
 ### Utility Classes
 - **`WeaviateCollectionUtils`**: Located in `src/lib/weaviate-collection-utils.ts`. Provides a wrapper around the `weaviate-client` library's `collections` API for common operations like creating, getting, updating, and deleting collections, as well as adding properties. Simplifies interactions with Weaviate collections.
