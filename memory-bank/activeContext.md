@@ -1,6 +1,6 @@
 # Active Context
 
-**Current Focus:** Building API endpoints for file system operations.
+**Current Focus:** Weaviate Document Upload (WEAVIATE-UPLOAD-001)
 
 **Recent Changes:**
 - Enhanced `src/components/ui/combobox.tsx` component to allow adding custom actions at the end:
@@ -85,3 +85,11 @@
 - The API properly handles nested subdirectories and provides both hierarchical and flat views of files
 - Used "node:" protocol prefixes for Node.js built-in modules to comply with project linting rules
 - Used for...of loop instead of forEach for better readability and to follow project linting guidelines
+
+## Current Focus: Weaviate Document Upload (WEAVIATE-UPLOAD-001)
+
+Implementing the API route `/api/docs/upload` to process files from `public/docs` and upload them to Weaviate. This involves:
+- Reading local files.
+- Connecting to Weaviate.
+- Batch uploading document content.
+- Tracking progress via a JSON status file.

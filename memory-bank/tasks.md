@@ -92,3 +92,5 @@ assigned_to: AI
 created_at: 2024-07-26T11:45:00Z # Placeholder
 updated_at: 2024-08-19T10:30:00Z # Placeholder
 --- 
+
+- [ ] WEAVIATE-UPLOAD-001: Create API route `/api/docs/upload` to read files from `public/docs`, upload to Weaviate, and track progress in a JSON file. 
