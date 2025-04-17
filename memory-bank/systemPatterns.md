@@ -17,4 +17,13 @@
 
 ### Utility Classes
 - **`WeaviateCollectionUtils`**: Located in `src/lib/weaviate-collection-utils.ts`. Provides a wrapper around the `weaviate-client` library's `collections` API for common operations like creating, getting, updating, and deleting collections, as well as adding properties. Simplifies interactions with Weaviate collections.
-- **`WeaviateObjectUtils`**: Located in `src/lib/weaviate-object-utils.ts`. Provides wrapper methods for CRUD operations on Weaviate objects, including both single operations and batch operations. Supports multi-tenancy through optional tenant parameters. Uses Promise.all pattern for efficient parallel batch processing. 
+  - **Important Pattern**: Always use the static `WeaviateCollectionUtils.create()` method rather than direct instantiation (`new WeaviateCollectionUtils()`) to ensure the Weaviate client is properly connected before use. This static method handles the connection asynchronously and returns a properly initialized instance.
+  - Example usage:
+    ```typescript
+    // Correct pattern:
+    const collectionUtils = await WeaviateCollectionUtils.create();
+    
+    // Incorrect pattern (will throw "Weaviate client not initialized" error):
+    const collectionUtils = new WeaviateCollectionUtils();
+    ```
+- **`WeaviateObjectUtils`**: Located in `src/lib/weaviate-object-utils.ts`. Provides wrapper methods for CRUD operations on Weaviate objects, including both single operations and batch operations. Supports multi-tenancy through optional tenant parameters. Uses Promise.all pattern for efficient parallel batch processing.

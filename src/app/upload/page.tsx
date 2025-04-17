@@ -305,16 +305,17 @@ export default function UploadPage() {
                           </CommandGroup>
                           <CommandSeparator />
                           <CommandGroup>
-                            <CommandItem
-                              onSelect={() => {
-                                setOpenCombobox(false); // Close popover
-                                setOpenDialog(true); // Open dialog
+                            <button 
+                              type="button"
+                              className="flex w-full items-center px-2 py-1.5 text-sm text-muted-foreground cursor-pointer hover:bg-accent hover:text-accent-foreground rounded-sm"
+                              onClick={() => {
+                                setOpenCombobox(false);
+                                setOpenDialog(true);
                               }}
-                              className="text-muted-foreground cursor-pointer"
                             >
                               <PlusCircle className="mr-2 h-4 w-4" />
                               Create new collection...
-                            </CommandItem>
+                            </button>
                           </CommandGroup>
                       </CommandList>
                     </Command>

@@ -6,14 +6,6 @@ import type { CollectionConfigCreate, Properties } from 'weaviate-client';
 
 export async function POST(request: NextRequest) {
   try {
-    // Ensure client is connected
-    if (!weaviateClient.collections) {
-      await weaviateClient.connect();
-      if (!weaviateClient.collections) {
-        console.error('API Create Route: Failed to connect to Weaviate');
-        return NextResponse.json({ error: 'Failed to connect to Weaviate' }, { status: 500 });
-      }
-    }
 
     const body = await request.json();
     const collectionName = body.collectionName;
@@ -28,7 +20,17 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Collection name must start with an uppercase letter.' }, { status: 400 });
     }
 
-    const collectionUtils = new WeaviateCollectionUtils();
+    // Use the static create method which ensures connection is established
+    let collectionUtils: WeaviateCollectionUtils;
+    try {
+      collectionUtils = await WeaviateCollectionUtils.create();
+    } catch (error) {
+      console.error('Failed to initialize WeaviateCollectionUtils:', error);
+      return NextResponse.json({ 
+        error: 'Failed to initialize Weaviate client',
+        details: error instanceof Error ? error.message : 'Unknown error' 
+      }, { status: 500 });
+    }
 
     // Define a minimal collection configuration
     // Explicitly type the config with Properties and string generics.
@@ -55,4 +57,4 @@ export async function POST(request: NextRequest) {
     // This might require inspecting the error object structure from the Weaviate client
     return NextResponse.json({ error: 'Failed to create collection', details: errorMessage }, { status: 500 });
   }
-} 
+}

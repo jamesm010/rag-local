@@ -1,8 +1,13 @@
 # Active Context
 
-**Current Focus:** Adding batch operations support to the Weaviate utility classes.
+**Current Focus:** Fixing issues with Weaviate collection operations.
 
 **Recent Changes:**
+- Fixed Weaviate collection API route in `src/app/api/collections/create/route.ts`:
+  - Replaced direct instantiation of `WeaviateCollectionUtils` with the static `create()` method
+  - Removed redundant client connection code
+  - Added proper error handling for connection failures
+  - This fixed the bug where CRUD methods were failing with "Weaviate client not initialized. Call connect() first" error
 - Added batch methods to `WeaviateObjectUtils` class in `src/lib/weaviate-object-utils.ts`:
   - `createObjects`: Batch creation of multiple objects using parallel Promise.all
   - `updateObjects`: Batch updating of multiple objects with their respective properties
