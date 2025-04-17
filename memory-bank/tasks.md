@@ -93,4 +93,22 @@ created_at: 2024-07-26T11:45:00Z # Placeholder
 updated_at: 2024-08-19T10:30:00Z # Placeholder
 --- 
 
-- [ ] WEAVIATE-UPLOAD-001: Create API route `/api/docs/upload` to read files from `public/docs`, upload to Weaviate, and track progress in a JSON file. 
+- [x] **WEAVIATE-UPLOAD-001:** Create API route `/api/docs/upload` to read files from `public/docs`, upload to Weaviate, and track progress in a JSON file. 
+  - **Status:** DONE
+  - **Complexity:** 3
+  - **Description:** Implement an API route that:
+    - Reads files from the public/docs directory
+    - Uploads content to Weaviate with appropriate metadata
+    - Tracks progress via a JSON file for status monitoring
+    - Supports specifying collection name via query parameter
+  - **Features Implemented:**
+    - Progress tracking with detailed file statistics
+    - Fault-tolerant processing with error tracking
+    - Dynamic collection creation
+    - Support for multiple file types (.txt, .md, .json)
+    - JSDoc comments for maintainability
+  - **API Endpoints:**
+    - POST /api/docs/upload?collection=Name - Upload documents
+    - GET /api/docs/upload?collection=Name - Check progress
+  - **Created Files:**
+    - src/app/api/docs/upload/route.ts 

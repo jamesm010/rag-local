@@ -40,3 +40,43 @@
     const collectionUtils = new WeaviateCollectionUtils();
     ```
 - **`WeaviateObjectUtils`**: Located in `src/lib/weaviate-object-utils.ts`. Provides wrapper methods for CRUD operations on Weaviate objects, including both single operations and batch operations. Supports multi-tenancy through optional tenant parameters. Uses Promise.all pattern for efficient parallel batch processing.
+
+## Progress Tracking Pattern
+
+The project implements a standardized approach to tracking progress for long-running operations:
+
+1. **Progress State Interface:**
+   ```typescript
+   interface ProgressState {
+     status: 'pending' | 'in-progress' | 'completed' | 'failed';
+     totalItems: number;
+     itemsProcessed: number;
+     itemsSucceeded: number;
+     failedItems: { id: string; error: string }[];
+     startTime: string | null;
+     endTime: string | null;
+     error: string | null;
+   }
+   ```
+
+2. **Persistence to Filesystem:**
+   - Progress state is persisted to disk in a JSON file
+   - Files are stored in the `.temp` directory
+   - Directory is created if it doesn't exist
+   - Standardized read/write helper functions
+
+3. **Concurrency Control:**
+   - Check for existing in-progress operations
+   - Return 409 Conflict if concurrent operation attempted
+   - Properly handle reset/initialization of state
+
+4. **Status Reporting:**
+   - Dedicated GET endpoint to check progress
+   - Consistent error reporting format
+   - Clear success/failure indicators
+   - Performance metrics (timing, counts)
+
+5. **Implementation Example:**
+   - See `src/app/api/docs/upload/route.ts` for reference implementation
+
+This pattern should be followed for all long-running API operations that require progress tracking or status monitoring.

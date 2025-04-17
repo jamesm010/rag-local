@@ -1,31 +1,58 @@
+/**
+ * API route for uploading and indexing documents to Weaviate
+ * Handles scanning files, tracking progress, and uploading to vector database
+ */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import weaviateClient from '@/lib/weaviate';
 import WeaviateCollectionUtils from '@/lib/weaviate-collection-utils';
 import WeaviateObjectUtils from '@/lib/weaviate-object-utils';
 import { NextResponse } from 'next/server';
+import type { Properties } from 'weaviate-client';
 // We might need the scanDirectory function or similar logic
 // import { scanDirectory } from '../route'; // Adjust path if needed
 
+/**
+ * File paths and configuration constants
+ */
 const PROGRESS_FILE_PATH = path.join(process.cwd(), '.temp', 'upload-progress.json');
 const DOCS_DIR = path.join(process.cwd(), 'public', 'docs');
-const COLLECTION_NAME = 'UploadedDocs';
+const DEFAULT_COLLECTION_NAME = 'UploadedDocs';
 const SUPPORTED_EXTENSIONS = ['.txt', '.md', '.json']; // Add more as needed
 
+/**
+ * Interface for tracking the current state of document upload process
+ * This is persisted to disk to allow for resuming and status checking
+ */
 interface ProgressState {
+  /** Current status of the upload process */
   status: 'pending' | 'in-progress' | 'completed' | 'failed';
+  /** Name of the Weaviate collection being used */
+  collectionName: string;
+  /** Total number of files found in the directory */
   totalFiles: number;
-  filesProcessed: number; // Files attempted to be read/processed
-  filesUploaded: number; // Files successfully added to batch
+  /** Number of files that have been attempted to be read/processed */
+  filesProcessed: number;
+  /** Number of files successfully added to the upload batch */
+  filesUploaded: number;
+  /** List of file paths that were successfully uploaded */
   uploadedFilePaths: string[];
+  /** List of files that failed to process with error messages */
   failedFiles: { filepath: string; error: string }[];
+  /** ISO timestamp when the upload process started */
   startTime: string | null;
+  /** ISO timestamp when the upload process ended */
   endTime: string | null;
+  /** Error message if the process failed */
   error: string | null;
 }
 
 // --- Helper Functions ---
 
+/**
+ * Reads the current progress state from the filesystem
+ * @returns The current ProgressState, or a new initialized state if file doesn't exist
+ */
 async function readProgress(): Promise<ProgressState> {
   try {
     const data = await fs.readFile(PROGRESS_FILE_PATH, 'utf-8');
@@ -40,17 +67,29 @@ async function readProgress(): Promise<ProgressState> {
   }
 }
 
+/**
+ * Writes the progress state to the filesystem
+ * Creates the directory if it doesn't exist
+ * @param state The current progress state to save
+ */
 async function writeProgress(state: ProgressState): Promise<void> {
   try {
+    // Ensure directory exists
+    await fs.mkdir(path.dirname(PROGRESS_FILE_PATH), { recursive: true });
     await fs.writeFile(PROGRESS_FILE_PATH, JSON.stringify(state, null, 2), 'utf-8');
   } catch (error) {
     console.error('Error writing progress file:', error);
   }
 }
 
+/**
+ * Creates a new initialized progress state with default values
+ * @returns A new empty ProgressState object
+ */
 function initializeProgressState(): ProgressState {
   return {
     status: 'pending',
+    collectionName: DEFAULT_COLLECTION_NAME,
     totalFiles: 0,
     filesProcessed: 0,
     filesUploaded: 0,
@@ -62,7 +101,11 @@ function initializeProgressState(): ProgressState {
   };
 }
 
-// Simplified file scanner (adapt scanDirectory from api/docs/route.ts if needed)
+/**
+ * Recursively scans a directory for files
+ * @param dirPath Directory path to scan
+ * @returns Array of absolute file paths found in the directory
+ */
 async function scanDocsDirectory(dirPath: string): Promise<string[]> {
   let fileList: string[] = [];
   try {
@@ -84,17 +127,42 @@ async function scanDocsDirectory(dirPath: string): Promise<string[]> {
 }
 
 // --- Weaviate Schema ---
+/**
+ * Interface for document properties stored in Weaviate
+ * Maps file metadata and content to Weaviate schema
+ */
 interface DocumentProperties {
+  /** Name of the document file */
   filename: string;
-  filepath: string; // Relative path used as identifier
+  /** Relative path used as identifier */
+  filepath: string;
+  /** Text content of the document */
   content: string;
+  /** File type extension (e.g., 'txt', 'md', 'json') */
   filetype: string;
-  lastModified: string; // ISO string date
+  /** ISO timestamp of when the file was last modified */
+  lastModified: string;
+  /** Additional properties for compatibility with Weaviate Properties type */
+  [key: string]: any;
 }
 
 // --- Route Handler ---
 
-export async function POST() {
+/**
+ * POST handler for uploading documents to Weaviate
+ * Processes files from the DOCS_DIR directory and uploads them to Weaviate
+ *
+ * Request parameters:
+ * - collection: (optional) Name of the Weaviate collection to use (defaults to 'UploadedDocs')
+ *
+ * @param request The incoming request with optional search params
+ * @returns JSON response with upload status and progress information
+ */
+export async function POST(request: Request) {
+  // Extract collection name from URL parameters or use default
+  const { searchParams } = new URL(request.url);
+  const collectionName = searchParams.get('collection') || DEFAULT_COLLECTION_NAME;
+
   let progress = await readProgress();
 
   // Prevent concurrent runs if one is already in progress
@@ -105,26 +173,32 @@ export async function POST() {
     );
   }
 
-  // Reset progress state for a new run
+  // Initialize a new progress state for this run
   progress = initializeProgressState();
   progress.status = 'in-progress';
+  progress.collectionName = collectionName;
   progress.startTime = new Date().toISOString();
   await writeProgress(progress);
 
   try {
-    // 1. Connect to Weaviate using your wrapper
+    /**
+     * Step 1: Initialize Weaviate client and utilities
+     */
     await weaviateClient.connect();
     const collectionUtils = await WeaviateCollectionUtils.create();
     const objectUtils = new WeaviateObjectUtils(); // Uses the connected client internally
 
-    // 2. Ensure Collection Exists
+    /**
+     * Step 2: Ensure the target collection exists
+     * Creates it with required schema if it doesn't
+     */
     const collections = await collectionUtils.listAllCollections();
-    const collectionExists = collections.some((c) => c.name === COLLECTION_NAME);
+    const collectionExists = collections.some((c) => c.name === collectionName);
 
     if (!collectionExists) {
-      console.log(`Collection '${COLLECTION_NAME}' not found, creating...`);
-      await collectionUtils.createCollection<DocumentProperties, typeof COLLECTION_NAME>({
-        name: COLLECTION_NAME,
+      console.log(`Collection '${collectionName}' not found, creating...`);
+      await collectionUtils.createCollection<DocumentProperties, string>({
+        name: collectionName,
         properties: [
           { name: 'filename', dataType: 'text' },
           { name: 'filepath', dataType: 'text' },
@@ -132,20 +206,15 @@ export async function POST() {
           { name: 'filetype', dataType: 'text' },
           { name: 'lastModified', dataType: 'date' },
         ],
-        // Basic vectorizer config - use vectorizers (plural) and structure
-        vectorizers: {
-          // Corrected: plural
-          name: 'text2vec-contextionary', // Assuming this is configured
-          // Add specific config if needed, e.g.,
-          // config: {
-          //    vectorizeClassName: false
-          // }
-        },
+        // No vectorizer specified - will use default
       });
-      console.log(`Collection '${COLLECTION_NAME}' created.`);
+      console.log(`Collection '${collectionName}' created.`);
     }
 
-    // 3. Scan Files
+    /**
+     * Step 3: Scan the document directory for files to process
+     * Creates directory if it doesn't exist
+     */
     let allFilePaths: string[] = [];
     try {
       allFilePaths = await scanDocsDirectory(DOCS_DIR);
@@ -169,9 +238,12 @@ export async function POST() {
     progress.totalFiles = allFilePaths.length;
     await writeProgress(progress);
 
+    /**
+     * Step 4: Process each file and prepare for upload
+     * Reads file content, extracts metadata, and validates file type
+     */
     const objectsToUpload: DocumentProperties[] = [];
 
-    // 4. Process Files
     for (const fullPath of allFilePaths) {
       const relativePath = path.relative(DOCS_DIR, fullPath).replace(/\\/g, '/'); // Fix: Escape backslash in replace
       const ext = path.extname(fullPath).toLowerCase();
@@ -210,14 +282,20 @@ export async function POST() {
     // Write progress once after processing loop
     await writeProgress(progress);
 
-    // 5. Batch Upload using WeaviateObjectUtils.createObjects
+    /**
+     * Step 5: Upload processed files to Weaviate
+     * Sends all valid documents to Weaviate in a batch operation
+     */
     if (objectsToUpload.length > 0) {
       try {
         console.log(
           `Attempting to upload ${objectsToUpload.length} objects using createObjects...`,
         );
         // Assuming createObjects handles potential errors internally or throws
-        const results = await objectUtils.createObjects(COLLECTION_NAME, objectsToUpload);
+        const results = await objectUtils.createObjects(
+          collectionName,
+          objectsToUpload as Properties[],
+        );
         // The createObjects method using Promise.all might not give detailed per-object errors easily
         // If it resolves, assume success for progress tracking for now.
         console.log(`Upload using createObjects finished. Result count: ${results.length}`);
@@ -239,7 +317,9 @@ export async function POST() {
       console.log('No new valid documents found to upload.');
     }
 
-    // 6. Finalize Progress
+    /**
+     * Step 6: Finalize progress and return results
+     */
     progress.status = progress.error ? 'failed' : 'completed';
     progress.endTime = new Date().toISOString();
     await writeProgress(progress);
@@ -267,10 +347,31 @@ export async function POST() {
   }
 }
 
-// Add GET handler to retrieve current progress?
-export async function GET() {
+/**
+ * GET handler to retrieve the current progress of document uploads
+ * Returns the current state of the upload process
+ *
+ * Request parameters:
+ * - collection: (optional) Filter progress by specific collection name
+ *
+ * @param request The incoming request with optional search params
+ * @returns JSON response with the current progress state or error message
+ */
+export async function GET(request: Request) {
   try {
     const progress = await readProgress();
+
+    // Filter by collection if specified
+    const { searchParams } = new URL(request.url);
+    const requestedCollection = searchParams.get('collection');
+
+    if (requestedCollection && progress.collectionName !== requestedCollection) {
+      return NextResponse.json({
+        message: `No active upload for collection '${requestedCollection}'`,
+        status: 'not_found',
+      });
+    }
+
     return NextResponse.json(progress);
   } catch (error: any) {
     return NextResponse.json(

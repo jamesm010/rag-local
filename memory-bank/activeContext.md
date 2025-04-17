@@ -2,6 +2,50 @@
 
 **Current Focus:** Weaviate Document Upload (WEAVIATE-UPLOAD-001)
 
+**Status:** Completed
+
+**Implementation Details:**
+- Created API route `/api/docs/upload` that processes files from `public/docs` and uploads them to Weaviate
+- Implemented comprehensive progress tracking via a JSON file stored in `.temp/upload-progress.json`
+- Added collection name parameter support via URL query parameter
+- Designed fault-tolerant file processing with detailed error tracking
+- Added JSDoc comments throughout the file for improved maintainability
+
+**Key Features:**
+1. **Progress Tracking:**
+   - Tracks total files, processed files, uploaded files, and failed files
+   - Stores start and end timestamps for performance monitoring
+   - Persists collection name for tracking uploads to different collections
+   - Properly handles concurrent upload attempts with 409 Conflict response
+
+2. **Collection Management:**
+   - Dynamically creates Weaviate collection if it doesn't exist
+   - Configurable collection name via query parameter (defaults to 'UploadedDocs')
+   - Sets up appropriate schema properties for document storage
+
+3. **File Processing:**
+   - Recursively scans document directory for supported file types (.txt, .md, .json)
+   - Creates directories if they don't exist
+   - Handles file reading errors gracefully with detailed reporting
+   - Extracts metadata including filename, path, content, and modification time
+
+4. **Error Handling:**
+   - Detailed error tracking for individual files
+   - Proper status codes for various error conditions
+   - Consistent error message format for client consumption
+
+**API Endpoints:**
+- `POST /api/docs/upload?collection=CollectionName` - Process and upload documents
+- `GET /api/docs/upload?collection=CollectionName` - Check upload progress
+
+**Affected Files:**
+- `src/app/api/docs/upload/route.ts` (Created)
+
+**Next Steps:**
+- Integrate with frontend UI for file upload and progress monitoring
+- Add support for more file types
+- Implement document deletion and update functionality
+
 **Recent Changes:**
 - Enhanced `src/components/ui/combobox.tsx` component to allow adding custom actions at the end:
   - Added new `actions` prop of type `React.ReactNode` to the `ComboboxProps` interface
