@@ -32,6 +32,16 @@ export class WeaviateCollectionUtils {
   }
 
   /**
+   * Get a collection instance scoped to a tenant.
+   * @param name Collection name
+   * @param tenant Tenant name/id
+   */
+  getCollectionForTenant<TProperties extends Properties = Properties, TName extends string = string>(name: TName, tenant: string) {
+    const collection = this.getCollection<TProperties, TName>(name);
+    return collection.withTenant(tenant);
+  }
+
+  /**
    * List all collection definitions.
    */
   async listAllCollections(): Promise<CollectionConfig[]> {
