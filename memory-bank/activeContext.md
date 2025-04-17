@@ -1,5 +1,40 @@
 # Active Context
 
+**Current Focus:** RAG Retrieval Implementation
+
+**Status:** COMPLETED
+
+**Implementation Details:**
+- Created utility class `WeaviateRetrievalUtils` for performing RAG (Retrieval Augmented Generation) operations using Weaviate's semantic search capabilities.
+- Implemented multiple search methods to handle different query patterns and use cases.
+- Fixed TypeScript type issues to ensure type safety and proper error handling.
+- Added static create method pattern for proper client initialization.
+
+**Key Features:**
+1. **Semantic Search Methods:**
+   - `nearTextSearch`: Basic semantic search using Weaviate's nearText method
+   - `nearTextSearchWithGroupBy`: Advanced search with groupBy functionality
+   - `retrieveForRAG`: Convenience wrapper for RAG with common settings
+
+2. **Multi-Tenancy Support:**
+   - All methods include optional tenant parameter
+   - Proper tenant scoping for multi-tenant collections
+
+3. **Type Safety:**
+   - Full TypeScript generic support for property types
+   - Properly typed return values matching Weaviate client types
+   - Consistent error handling with proper TypeScript types
+
+**Affected Files:**
+- `src/lib/weaviate-retrieval-utils.ts` (Created)
+
+**Next Steps:**
+- Implement RAG API endpoint that uses the WeaviateRetrievalUtils
+- Create frontend interface for RAG queries
+- Add documentation on RAG capabilities
+
+## Previous Work:
+
 **Current Focus:** Weaviate Document Upload (WEAVIATE-UPLOAD-001)
 
 **Status:** Completed

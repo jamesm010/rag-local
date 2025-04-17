@@ -17,6 +17,65 @@
 - File system operations using Node.js fs module with promisified functions for async handling.
 - Recursive directory scanning pattern for traversing nested directory structures.
 - Chunked batch processing for handling large numbers of files (20 files per batch).
+- RAG (Retrieval Augmented Generation) pattern using Weaviate's nearText method for semantic search.
+
+### RAG (Retrieval Augmented Generation) Pattern
+
+The project implements a standardized approach for retrieving documents from Weaviate based on semantic similarity to input queries:
+
+1. **Retrieval Utility:**
+   - Using `WeaviateRetrievalUtils` class for standardized semantic search operations
+   - Located in `src/lib/weaviate-retrieval-utils.ts`
+   - Implements methods for both standard and group-by semantic searches
+   - Provides a convenience wrapper for RAG with common settings
+
+2. **Semantic Search Methods:**
+   ```typescript
+   // Basic semantic search using nearText
+   async nearTextSearch<TProperties>(
+     collectionName: string,
+     query: string | string[],
+     options?: BaseNearTextOptions<TProperties>,
+     tenant?: string
+   ): Promise<WeaviateReturn<TProperties>>
+
+   // Group-by semantic search
+   async nearTextSearchWithGroupBy<TProperties>(
+     collectionName: string,
+     query: string | string[],
+     options: GroupByNearTextOptions<TProperties>,
+     tenant?: string
+   ): Promise<GroupByReturn<TProperties>>
+
+   // Convenience wrapper with common RAG settings
+   async retrieveForRAG<TProperties>(
+     collectionName: string,
+     query: string,
+     limit = 5,
+     propertyNames?: string[],
+     tenant?: string
+   ): Promise<WeaviateReturn<TProperties>>
+   ```
+
+3. **Initialization Pattern:**
+   ```typescript
+   // Correct pattern using static create method
+   const retrievalUtils = await WeaviateRetrievalUtils.create();
+   
+   // This ensures the Weaviate client is properly connected
+   ```
+
+4. **Usage Pattern:**
+   ```typescript
+   // Example usage in an API route
+   const results = await retrievalUtils.retrieveForRAG(
+     'DocumentCollection',
+     'How does authentication work?',
+     5
+   );
+   ```
+
+This pattern should be used whenever implementing RAG functionality to ensure consistency and reliability across the application.
 
 ### File System Operations
 - **Directory Scanning**: Recursively scan directories using a tree-based approach that preserves the hierarchical structure.
@@ -101,6 +160,7 @@ This pattern should be used for any operation that processes large numbers of it
     const collectionUtils = new WeaviateCollectionUtils();
     ```
 - **`WeaviateObjectUtils`**: Located in `src/lib/weaviate-object-utils.ts`. Provides wrapper methods for CRUD operations on Weaviate objects, including both single operations and batch operations. Supports multi-tenancy through optional tenant parameters. Uses Promise.all pattern for efficient parallel batch processing.
+- **`WeaviateRetrievalUtils`**: Located in `src/lib/weaviate-retrieval-utils.ts`. Provides wrapper methods for semantic search operations using the nearText method. Implements common patterns for Retrieval Augmented Generation (RAG). Includes both standard and group-by search capabilities. Like other utilities, follows the static create() method pattern for proper client initialization.
 
 ## Progress Tracking Pattern
 

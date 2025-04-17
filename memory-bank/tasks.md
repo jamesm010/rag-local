@@ -28,6 +28,26 @@
 
 ## Current Tasks
 
+- [x] **Task ID: RAG-UTILS-001** - Create RAG Retrieval Utility
+  - **Status:** DONE
+  - **Complexity:** 2
+  - **Description:** Implement a utility class for RAG (Retrieval Augmented Generation) operations using Weaviate's semantic search capabilities.
+  - **Assignee:** AI
+  - **Sub-tasks:**
+    - [x] Create WeaviateRetrievalUtils class
+    - [x] Implement nearTextSearch method
+    - [x] Implement nearTextSearchWithGroupBy method
+    - [x] Implement retrieveForRAG convenience method
+    - [x] Fix TypeScript type issues
+    - [x] Ensure proper client initialization pattern
+  - **Dependencies:** weaviate-client
+  - **Estimate:** 1 hour
+  - **Actual:** ~45 mins
+  - **History:**
+    - [2024-08-22] Created and implemented
+    - [2024-08-22] Fixed TypeScript type issues
+    - [2024-08-22] Completed implementation
+
 - [x] **Task ID: FE_UI_FIX_001** - Fix UI Component Errors
   - **Status:** DONE
   - **Complexity:** 1
