@@ -1,7 +1,12 @@
 import { WeaviateCollectionUtils } from '@/lib/weaviate-collection-utils';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { type CollectionConfigCreate, type Properties, vectorizer } from 'weaviate-client';
+import {
+  type CollectionConfigCreate,
+  type Properties,
+  generative,
+  vectorizer,
+} from 'weaviate-client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,8 +50,12 @@ export async function POST(request: NextRequest) {
     const config: CollectionConfigCreate<Properties, string> = {
       name: collectionName,
       vectorizers: vectorizer.text2VecOllama({
-        apiEndpoint: 'http://localhost:11434',
+        apiEndpoint: 'http://host.docker.internal:11434',
         model: 'nomic-embed-text',
+      }),
+      generative: generative.ollama({
+        apiEndpoint: 'http://host.docker.internal:11434',
+        model: 'gemma3:4b',
       }),
       properties: [], // Explicitly pass empty properties array
       // Add other default configurations if needed, e.g.,

@@ -3,7 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest, { params }: { params: { name: string } }) {
   try {
-    const collectionName = params.name;
+    // Await the params object before accessing its properties
+    const { name } = await params;
+    const collectionName = name;
 
     // Basic validation
     if (
