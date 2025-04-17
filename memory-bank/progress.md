@@ -6,6 +6,8 @@
 - API route for batch document upload to Weaviate
 - Basic upload page UI with file selector and class name input
 - Error handling and success notifications using sonner toast
+- Weaviate object utilities with both single and batch operations (create, update, delete)
+- Multi-tenancy support in all Weaviate utility methods
 
 ## What's Left
 - Testing the upload functionality with actual JSON data
@@ -24,3 +26,5 @@
 - Using shadcn/ui components for consistent UI styling
 - File upload handling with client-side validation and parsing
 - API routes with proper error handling and status codes 
+- Parallel batch operations for Weaviate objects using Promise.all pattern
+- Generic typing with TypeScript for type-safe API interactions 

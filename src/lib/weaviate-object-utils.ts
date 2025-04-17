@@ -1,4 +1,4 @@
-import type { Collections, Properties, Filter, FilterValue, NonReferenceInputs } from 'weaviate-client';
+import type { Collections, Properties, Filter, FilterValue, NonReferenceInputs, WeaviateObject } from 'weaviate-client';
 import weaviateClient from './weaviate';
 
 /**
@@ -30,6 +30,28 @@ export class WeaviateObjectUtils {
     let collection = this.collections.get<TProperties, TName>(collectionName);
     if (tenant) collection = collection.withTenant(tenant);
     return collection.data.insert(objectData);
+  }
+
+  /**
+   * Create multiple objects in a collection in a single batch operation.
+   * @param collectionName Name of the collection
+   * @param objectsData Array of object data to insert
+   * @param tenant (Optional) Tenant name/id
+   */
+  async createObjects<TProperties extends Properties = Properties, TName extends string = string>(
+    collectionName: TName,
+    objectsData: TProperties[],
+    tenant?: string
+  ) {
+    let collection = this.collections.get<TProperties, TName>(collectionName);
+    if (tenant) collection = collection.withTenant(tenant);
+    
+    // Insert multiple objects by creating a promise for each insert operation
+    const insertPromises = objectsData.map(properties => 
+      collection.data.insert(properties)
+    );
+    
+    return Promise.all(insertPromises);
   }
 
   /**
@@ -68,6 +90,31 @@ export class WeaviateObjectUtils {
   }
 
   /**
+   * Update multiple objects in a collection in a single batch operation.
+   * @param collectionName Name of the collection
+   * @param updates Array of objects with id and properties to update
+   * @param tenant (Optional) Tenant name/id
+   */
+  async updateObjects<TProperties extends Properties = Properties, TName extends string = string>(
+    collectionName: TName,
+    updates: Array<{ id: string; properties: Partial<TProperties> }>,
+    tenant?: string
+  ) {
+    let collection = this.collections.get<TProperties, TName>(collectionName);
+    if (tenant) collection = collection.withTenant(tenant);
+    
+    // Update objects in batch
+    const updatePromises = updates.map(update => 
+      collection.data.update({ 
+        id: update.id, 
+        properties: update.properties as unknown as NonReferenceInputs<TProperties> 
+      })
+    );
+    
+    return Promise.all(updatePromises);
+  }
+
+  /**
    * Delete an object by ID.
    * @param collectionName Name of the collection
    * @param id The object ID
@@ -81,6 +128,25 @@ export class WeaviateObjectUtils {
     let collection = this.collections.get<TProperties, TName>(collectionName);
     if (tenant) collection = collection.withTenant(tenant);
     return collection.data.deleteById(id);
+  }
+
+  /**
+   * Delete multiple objects by their IDs in a single batch operation.
+   * @param collectionName Name of the collection 
+   * @param ids Array of object IDs to delete
+   * @param tenant (Optional) Tenant name/id
+   */
+  async deleteObjects<TProperties extends Properties = Properties, TName extends string = string>(
+    collectionName: TName,
+    ids: string[],
+    tenant?: string
+  ) {
+    let collection = this.collections.get<TProperties, TName>(collectionName);
+    if (tenant) collection = collection.withTenant(tenant);
+    
+    // Delete objects in batch
+    const deletePromises = ids.map(id => collection.data.deleteById(id));
+    return Promise.all(deletePromises);
   }
 
   /**

@@ -55,6 +55,21 @@
     - `[timestamp]` - Basic UI implementation completed
     - `[timestamp]` - UI component errors fixed
 
+- [x] **Task ID: WEAVIATE_BATCH_OPS** - Add Batch Operations to WeaviateObjectUtils
+  - **Status:** DONE
+  - **Complexity:** 2
+  - **Description:** Implement batch operations (create, update, delete) in the WeaviateObjectUtils class to improve performance when dealing with multiple objects.
+  - **Assignee:** AI
+  - **Sub-tasks:**
+    - [x] Add createObjects method for batch creation
+    - [x] Add updateObjects method for batch updates
+    - [x] Add deleteObjects method for batch deletions
+    - [x] Ensure multi-tenancy support in all methods
+    - [x] Fix TypeScript type issues
+  - **History:**
+    - `[2024-08-18]` - Task created
+    - `[2024-08-18]` - Implementation completed with Promise.all pattern
+
 ### 2024-08-18
 
 - [ ] **Fix Linter Errors in `weaviate-collection-utils.ts`** (ID: FIX-LINT-WEAVIATE-UTILS) - Level 1

@@ -1,8 +1,13 @@
 # Active Context
 
-**Current Focus:** Task FE_UPLOAD_001 - Create Frontend Upload Page.
+**Current Focus:** Adding batch operations support to the Weaviate utility classes.
 
 **Recent Changes:**
+- Added batch methods to `WeaviateObjectUtils` class in `src/lib/weaviate-object-utils.ts`:
+  - `createObjects`: Batch creation of multiple objects using parallel Promise.all
+  - `updateObjects`: Batch updating of multiple objects with their respective properties
+  - `deleteObjects`: Batch deletion of objects by IDs
+- All batch methods maintain support for multi-tenancy (optional tenant parameter)
 - Installed shadcn UI components (button, card, input, label) using pnpm
 - Replaced deprecated toast component with sonner for notifications
 - Added Toaster component to layout.tsx
@@ -23,6 +28,10 @@
 - Completed Task INIT-001.
 
 ### 2024-08-18 Work Log:
+- Added batch operation methods to `src/lib/weaviate-object-utils.ts`:
+  - Implemented parallelized batch operations using Promise.all pattern
+  - Fixed TypeScript type issues related to BatchObject interface
+  - Maintained multi-tenancy support across all methods
 - Attempted to fix linter errors in `src/lib/weaviate-collection-utils.ts` (Task ID: FIX-LINT-WEAVIATE-UTILS).
 - Resolved issues with `any` types and optional chaining in `createCollection`, `getCollection`, and `updateCollection` methods.
 - Encountered persistent TypeScript type errors related to the `property` argument in the `addProperty` method.
