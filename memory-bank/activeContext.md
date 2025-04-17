@@ -1,8 +1,16 @@
 # Active Context
 
-**Current Focus:** Fixing issues with Weaviate collection operations.
+**Current Focus:** Building API endpoints for file system operations.
 
 **Recent Changes:**
+- Enhanced `src/components/ui/combobox.tsx` component to allow adding custom actions at the end:
+  - Added new `actions` prop of type `React.ReactNode` to the `ComboboxProps` interface
+  - Added a conditional render for the actions in a bordered container at the bottom of the dropdown
+  - Added proper TypeScript support with destructuring in component props
+- Created `src/app/example-combobox/page.tsx` as a demonstration page showing:
+  - Basic combobox without actions (standard implementation)
+  - Enhanced combobox with an "Add new fruit..." action button
+  - Live state management for adding new items to the combobox options
 - Fixed Weaviate collection API route in `src/app/api/collections/create/route.ts`:
   - Replaced direct instantiation of `WeaviateCollectionUtils` with the static `create()` method
   - Removed redundant client connection code
@@ -46,32 +54,34 @@
 - The user manually updated the `addProperty` signature to use `PropertyConfigCreate<TProperties>`.
 - Currently blocked on resolving the type error for `addProperty`.
 
-## Current Task: Implement Collection Combobox on Upload Page
+## Current Task: Create API endpoint for reading files from public/docs directory
 
 **Status:** Completed Implementation
 
 **Details:**
-- Replaced className text input with Shadcn Combobox.
-- Added API route `/api/collections` to list existing Weaviate collections.
-- Added API route `/api/collections/create` to create new collections (POST request with `{ collectionName: string }`).
-- Implemented `useEffect` hook in `upload/page.tsx` to fetch collections on mount.
-- Populated Combobox with fetched collections.
-- Added "Create new collection..." option in Combobox triggering a Shadcn Dialog.
-- Implemented Dialog UI for entering new collection name.
-- Added `handleCreateCollection` function to call the create API route.
-- Updated Combobox and selected collection state upon successful creation.
-- Updated main form submission (`handleSubmit`) to use `selectedCollection` state.
-- Added relevant loading states (`isFetchingCollections`, `isCreatingCollection`).
-- Addressed TypeScript errors in backend API routes.
+- Created new API endpoint at `/api/docs` to recursively scan the public/docs directory
+- Implemented comprehensive file metadata retrieval with TypeScript interfaces:
+  - File name, path, size, modification date, type (extension)
+  - Directory detection with recursive scanning for nested files
+  - Organization of files by type
+- Implemented directory auto-creation if the public/docs directory doesn't exist
+- Used Node.js fs module with promisified functions for better async handling
+- Employed Promise.all pattern for parallel file processing
+- Added comprehensive error handling and proper status codes
+- Added test files to verify functionality
 
 **Affected Files:**
-- `src/app/upload/page.tsx` (Modified)
-- `src/app/api/collections/route.ts` (Created)
-- `src/app/api/collections/create/route.ts` (Created)
-- `src/lib/weaviate-collection-utils.ts` (Used by API)
-- `memory-bank/*` (Updated)
-- `components.json` (Checked)
-- `package.json` / `pnpm-lock.yaml` (Implicitly updated via `shadcn add`)
+- `src/app/api/docs/route.ts` (Created)
+- `public/docs/` (Created with test files)
+
+**Response Structure:**
+- `fileTree`: Complete hierarchical structure showing directories and files
+- `files`: Flat list of all files (excluding directories)
+- `filesByType`: Files grouped by their extension type
+- `count`: Total number of files found
+- `message`: Status message
 
 **Notes:**
-- A minor accessibility lint warning persists on the `CommandList` within the Combobox pattern in `upload/page.tsx`. It doesn't affect functionality and was difficult to suppress reliably.
+- The API properly handles nested subdirectories and provides both hierarchical and flat views of files
+- Used "node:" protocol prefixes for Node.js built-in modules to comply with project linting rules
+- Used for...of loop instead of forEach for better readability and to follow project linting guidelines

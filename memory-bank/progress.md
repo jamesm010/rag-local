@@ -7,6 +7,8 @@
   - Creating collections
   - Listing collections
   - Batch document upload
+- API route for file system operations:
+  - `/api/docs` endpoint for recursive directory listing with file metadata
 - Weaviate collection utilities with CRUD operations (fixed issue with client initialization)
 - Weaviate object utilities with both single and batch operations (create, update, delete)
 - Multi-tenancy support in all Weaviate utility methods
@@ -32,14 +34,14 @@
 - Parallel batch operations for Weaviate objects using Promise.all pattern
 - Generic typing with TypeScript for type-safe API interactions 
 
-## Current Focus: Weaviate Collection Operations
+## Current Focus: File System API Operations
 
-- **Status:** Fixed issue with collection creation API route where CRUD methods were failing with "Weaviate client not initialized" error.
+- **Status:** Successfully implemented recursive directory scanning API endpoint at `/api/docs`.
 - **Blockers:** None.
 - **Next Steps:**
-    1. **Verification:** Test the collection creation and management functionality:
-        - Can collections be created successfully via the API?
-        - Can collections be listed correctly?
-        - Do all CRUD operations work correctly when using the proper initialization pattern?
-    2. **Documentation:** Update documentation to emphasize the importance of using the static create() method.
-    3. **Testing:** Complete testing of the upload page functionality with the fixed collection operations.
+    1. **Feature Enhancement:** Consider adding additional file operations such as:
+        - File content reading API
+        - File upload capabilities 
+        - File deletion/renaming functionality
+    2. **Integration:** Potentially integrate the file system API with the document upload functionality to allow selecting documents from the public/docs directory.
+    3. **Testing:** Further test the API with more complex directory structures and file types.

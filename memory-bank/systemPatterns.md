@@ -14,6 +14,19 @@
 - API route pattern: Next.js App Router (`src/app/api/.../route.ts`).
 - Batch processing pattern used for Weaviate uploads (`client.batch.objectsBatcher`).
 - Parallelized batch operations using Promise.all pattern for improved performance.
+- File system operations using Node.js fs module with promisified functions for async handling.
+- Recursive directory scanning pattern for traversing nested directory structures.
+
+### File System Operations
+- **Directory Scanning**: Recursively scan directories using a tree-based approach that preserves the hierarchical structure.
+- **File Metadata**: Extract comprehensive file metadata including name, path, size, type, and modification date.
+- **Type Organization**: Group files by their extension types for better organization and filtering.
+- **Error Handling**: Proper error handling with informative messages and appropriate status codes in API responses.
+- **Auto-creation**: Automatically create directories if they don't exist to ensure smooth operation.
+- **Node.js Patterns**:
+  - Use the `node:` protocol prefix for Node.js built-in modules (`node:fs`, `node:path`, `node:util`) for clarity and to follow project linting rules.
+  - Prefer promisified functions (`promisify`) over callback-based Node.js APIs for better async handling.
+  - Use `for...of` loops instead of `forEach` when processing arrays for better readability and to follow project linting guidelines.
 
 ### Utility Classes
 - **`WeaviateCollectionUtils`**: Located in `src/lib/weaviate-collection-utils.ts`. Provides a wrapper around the `weaviate-client` library's `collections` API for common operations like creating, getting, updating, and deleting collections, as well as adding properties. Simplifies interactions with Weaviate collections.
