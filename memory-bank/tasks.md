@@ -128,3 +128,39 @@ updated_at: 2024-08-19T10:30:00Z # Placeholder
     - GET /api/docs/upload?collection=Name - Check progress
   - **Created Files:**
     - src/app/api/docs/upload/route.ts 
+
+## New Task
+
+- **Task ID: COLLECTION-DELETE-001**
+  - **Description:** Implement API route for deleting Weaviate collections
+  - **Complexity:** 2
+  - **Status:** Done
+  - **Assignee:** AI
+  - **Sub-tasks:**
+    - [x] Create DELETE endpoint at `/api/collections/delete`
+    - [x] Implement collection name validation
+    - [x] Add error handling and logging
+    - [x] Integrate with WeaviateCollectionUtils
+  - **Dependencies:** WeaviateCollectionUtils
+  - **Estimate:** 1 hour
+  - **Actual:** ~30 mins
+  - **History:**
+    - [2024-04-17] Created and completed
+    - [2024-04-17] Implemented DELETE endpoint with validation and error handling
+
+- **Task ID: COLLECTION-INFO-001**
+  - **Description:** Implement API route for retrieving Weaviate collection information
+  - **Complexity:** 2
+  - **Status:** Done
+  - **Assignee:** AI
+  - **Sub-tasks:**
+    - [x] Create GET endpoint at `/api/collections/[name]`
+    - [x] Implement collection name validation
+    - [x] Add error handling and logging
+    - [x] Integrate with WeaviateCollectionUtils
+  - **Dependencies:** WeaviateCollectionUtils
+  - **Estimate:** 1 hour
+  - **Actual:** ~30 mins
+  - **History:**
+    - [2024-04-17] Created and completed
+    - [2024-04-17] Implemented GET endpoint with validation and error handling 

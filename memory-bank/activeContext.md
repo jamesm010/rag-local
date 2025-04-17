@@ -94,6 +94,12 @@
 - Verified basic setup by running dev server.
 - Completed Task INIT-001.
 - Confirmed installation/presence of Shadcn UI components: Dialog, Command, Popover, lucide-react.
+- Created new API route `/api/collections/delete` for deleting Weaviate collections:
+  - Implemented DELETE endpoint with proper validation and error handling
+  - Added collection name validation (must start with uppercase letter)
+  - Integrated with WeaviateCollectionUtils for collection deletion
+  - Added comprehensive error handling and logging
+  - Returns appropriate HTTP status codes (200, 400, 500)
 
 ### 2024-08-18 Work Log:
 - Added batch operation methods to `src/lib/weaviate-object-utils.ts`:
@@ -147,3 +153,44 @@ Implementing the API route `/api/docs/upload` to process files from `public/docs
 - Connecting to Weaviate.
 - Batch uploading document content.
 - Tracking progress via a JSON status file.
+
+# Active Context
+
+**Current Focus:** Weaviate Collection Management (WEAVIATE-COLLECTIONS-001)
+
+**Status:** In Progress
+
+**Implementation Details:**
+- Created API route `/api/collections/[name]` for retrieving collection information
+- Implemented proper error handling and validation
+- Added comprehensive logging for debugging
+- Integrated with WeaviateCollectionUtils for consistent collection management
+
+**Key Features:**
+1. **Collection Information Retrieval:**
+   - Dynamic route parameter for collection name
+   - Input validation for collection name
+   - Proper error handling for invalid names
+   - Comprehensive collection configuration retrieval
+
+2. **Error Handling:**
+   - Validation for empty or invalid collection names
+   - Proper error handling for Weaviate client initialization
+   - Detailed error messages with appropriate HTTP status codes
+   - Consistent error response format
+
+3. **Integration:**
+   - Uses WeaviateCollectionUtils for consistent collection management
+   - Maintains connection state properly
+   - Follows existing API patterns and conventions
+
+**API Endpoints:**
+- `GET /api/collections/{collectionName}` - Get collection information
+
+**Affected Files:**
+- `src/app/api/collections/[name]/route.ts` (Created)
+
+**Next Steps:**
+- Add support for collection statistics
+- Implement collection property management
+- Add collection data retrieval capabilities

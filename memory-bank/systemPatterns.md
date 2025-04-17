@@ -141,3 +141,72 @@ The project implements a standardized approach to tracking progress for long-run
    - See `src/app/api/docs/upload/route.ts` for reference implementation
 
 This pattern should be followed for all long-running API operations that require progress tracking or status monitoring.
+
+### Collection Management API Pattern
+
+The project implements a standardized approach to managing Weaviate collections through RESTful API endpoints:
+
+1. **Collection Name Validation:**
+   ```typescript
+   // Collection names must:
+   // - Be non-empty strings
+   // - Start with an uppercase letter
+   if (!collectionName || typeof collectionName !== 'string' || collectionName.trim().length === 0) {
+     return NextResponse.json({ error: 'Invalid collection name provided' }, { status: 400 });
+   }
+   if (!/^[A-Z]/.test(collectionName)) {
+     return NextResponse.json(
+       { error: 'Collection name must start with an uppercase letter.' },
+       { status: 400 },
+     );
+   }
+   ```
+
+2. **API Endpoints:**
+   - `GET /api/collections` - List all collections
+   - `GET /api/collections/[name]` - Get collection information
+   - `POST /api/collections/create` - Create a new collection
+   - `DELETE /api/collections/delete` - Delete an existing collection
+   - All endpoints follow RESTful conventions
+   - Consistent error handling and response format
+
+3. **Error Handling:**
+   - 400 Bad Request for invalid input
+   - 500 Internal Server Error for server/Weaviate issues
+   - Detailed error messages in response body
+   - Proper error logging for debugging
+
+4. **Response Format:**
+   ```typescript
+   // Success response
+   {
+     message?: string;
+     collection?: CollectionConfig;  // For GET /api/collections/[name]
+     collections?: string[];         // For GET /api/collections
+     // Additional data if applicable
+   }
+
+   // Error response
+   {
+     error: string;
+     details?: string;
+   }
+   ```
+
+5. **Implementation Example:**
+   ```typescript
+   try {
+     const collectionUtils = await WeaviateCollectionUtils.create();
+     const collection = collectionUtils.getCollection(collectionName);
+     const config = await collection.config.get();
+     return NextResponse.json({ collection: config });
+   } catch (error) {
+     console.error('API Error:', error);
+     return NextResponse.json(
+       { error: 'Failed to fetch collection information', details: errorMessage },
+       { status: 500 },
+     );
+   }
+   ```
+
+This pattern should be followed for all collection management operations to ensure consistency and reliability.
