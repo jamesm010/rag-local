@@ -28,3 +28,16 @@
 - API routes with proper error handling and status codes 
 - Parallel batch operations for Weaviate objects using Promise.all pattern
 - Generic typing with TypeScript for type-safe API interactions 
+
+## Current Focus: Upload Page Collection Selection
+
+- **Status:** Implementation complete for Combobox and Dialog. API routes created and frontend updated. Ready for verification.
+- **Blockers:** None.
+- **Next Steps:**
+    1. **Verification:** Test the upload page functionality:
+        - Does the Combobox load existing collections?
+        - Can a collection be selected?
+        - Does the "Create new" option open the Dialog?
+        - Can a new collection be created via the Dialog? (Check Weaviate instance and UI update)
+        - Can a file be uploaded successfully using a selected collection?
+    2. **Archiving:** Update task status and archive details upon successful verification. 

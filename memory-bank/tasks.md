@@ -77,3 +77,18 @@
     - Goal: Resolve TypeScript type errors reported by the linter.
     - Scope: `src/lib/weaviate-collection-utils.ts`
     - Context: Address `any` types, optional chaining, and argument type mismatches based on Weaviate client v3 documentation. **Currently blocked by a persistent type error on the `property` argument of the `addProperty` method.** 
+
+---
+id: T004
+title: Implement Collection Combobox on Upload Page
+status: Verification Pending
+complexity: 3
+description: >
+  Replace the class name text input on the /upload page with a Shadcn Combobox.
+  List existing collections fetched via API. Include an option to create a new
+  collection using a Shadcn Dialog. Requires new API endpoints.
+dependencies: []
+assigned_to: AI
+created_at: 2024-07-26T11:45:00Z # Placeholder
+updated_at: 2024-08-19T10:30:00Z # Placeholder
+--- 

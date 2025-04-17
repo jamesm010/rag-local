@@ -23,3 +23,17 @@
 
 **Assumptions:**
 - Node.js and pnpm are installed globally. 
+
+### UI Components
+- shadcn/ui
+  - Button
+  - Card
+  - Input
+  - Label
+  - Sonner (Toasts)
+  - **Combobox (New)**
+  - **Dialog (New)**
+  - Command (Confirmed)
+  - Dialog (Confirmed)
+  - Popover (Confirmed)
+  - lucide-react (Confirmed - for icons) 

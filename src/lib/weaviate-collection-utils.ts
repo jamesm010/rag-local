@@ -45,7 +45,16 @@ export class WeaviateCollectionUtils {
    * List all collection definitions.
    */
   async listAllCollections(): Promise<CollectionConfig[]> {
-    return this.collections.listAll();
+    try {
+      return await this.collections.listAll();
+    } catch (error) {
+      console.error('Error listing collections:', error);
+      throw new Error(
+        error instanceof Error 
+          ? `Failed to list collections: ${error.message}` 
+          : 'Failed to list collections'
+      );
+    }
   }
 
   /**
@@ -102,6 +111,14 @@ export class WeaviateCollectionUtils {
     }
     const collection = this.getCollection<TProperties, TName>(name);
     return collection.config.addProperty(property);
+  }
+
+  /**
+   * Static method to create an initialized instance after ensuring client connection
+   */
+  static async create(): Promise<WeaviateCollectionUtils> {
+    await weaviateClient.connect();
+    return new WeaviateCollectionUtils();
   }
 }
 
